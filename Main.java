@@ -1,21 +1,14 @@
-
 import java.io.*;
 import java.util.ArrayList;
 
 public class Main {
+
     public static void main(String[] args) throws IOException, InterruptedException {
 
-        String[] V = {"PLUS","MINUS","AAAA"};
-        String[] T = {"a","b","c"};
-        String[] P = {"règles", "r2", "r3", "r4"};
         String S = "Program";
         ArrayList<ArrayList<String>> scanning;
         int[][] actionTable;
         int[][] matchTable;
-
-
-
-
 
         String sourceFile = "", option="";
 
@@ -35,12 +28,6 @@ public class Main {
         scanning = runScanning(sourceFile);
         String[] listToken = scanning.get(0).toArray(new String[0]);
         String[] variables = scanning.get(1).toArray(new String[0]);
-
-        //actionTable = runPython();
-
-        //System.out.println(Arrays.toString(actionTable));
-
-        //System.out.println(Arrays.toString(listToken));
 
         initActionTable a = new initActionTable();
         actionTable = a.getActionTable()[0];
@@ -71,14 +58,10 @@ public class Main {
 
         // read the file from the scaner and create two arrays, one whith the token and another with the variables
 
-        //try (FileWriter fw = new FileWriter("scaner.txt")){ // pour écrire dans un fichier texte
         while((line = reader.readLine()) != null && ! line.equals("") ) {
-            //fw.write(Arrays.toString(line.split(" ")) + "\n");
-            String[] temp = line.split(" ");
-            //temp = temp[1].split("\t");
-            scaner.add(temp[temp.length-1]);
-            //System.out.println(scaner.get(scaner.size()-1));
 
+            String[] temp = line.split(" ");
+            scaner.add(temp[temp.length-1]);
 
         }
         reader.readLine();
@@ -86,18 +69,6 @@ public class Main {
             String[] temp = line.split("\t");
             variables.add(temp[0]);
         }
-        //System.out.println("res: "+scaner);
-        //System.out.println("var: "+variables);
-
-        /*
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-
-         */
-        //System.out.println(scaner);
-
 
         proc.waitFor();
 
@@ -107,45 +78,4 @@ public class Main {
         return res;
     }
 
-    /**
-     * Run the python script building the action table
-     * Return an arraylist of string's array containing the action table
-     */
-    public static ArrayList<String[]> runPython() throws IOException, InterruptedException {
-
-        String command = "python3 main.py";
-
-        Process proc = Runtime.getRuntime().exec(command);
-
-        BufferedReader reader =
-                new BufferedReader(new InputStreamReader(proc.getInputStream()));
-
-        String line;
-
-        // read the file from the parser and create two arrays, one whith the token and another with the variables
-
-        FileWriter fw = new FileWriter("parser.txt"); // pour écrire dans un fichier texte
-        ArrayList<String[]> parser = new ArrayList<>();
-        while((line = reader.readLine()) != null && ! line.equals("") ) {
-            //fw.write(Arrays.toString(line.split(" ")) + "\n");
-            //fw.write(line);
-            //System.out.println(line);
-            //String[] temp = line.split(" ");
-            //temp = temp[1].split("\t");
-            //String[] temp = line.split(" ");
-            //temp.filter(x -> !x.isEmpty()).toArray(String[]::new);
-            parser.add(line.split((" ")));
-
-
-        }
-        /*
-        for (String[] strings : parser) {
-            System.out.println(Arrays.toString(strings));
-        }
-
-         */
-
-        proc.waitFor();
-        return parser;
-    }
 }

@@ -1,21 +1,18 @@
 import java.util.*;
 
+/**
+ * Class implementing a parser of alCOl language
+ */
 public class Parser {
 
-
-
-    private String[] V;
-    private String[] T;
-    private String[] P;
     private String S;
     int[][] M;
     int[][] matchTable;
     String[] parser;
     private Stack<String> stack = new Stack<>();
-    Map<String, Integer> derivToInt = new HashMap<String, Integer>();
-    Map<String, Integer> varToInt = new HashMap<String, Integer>();
-    Map<Integer, String[]> gram = new HashMap<Integer,String[]>();
-
+    Map<String, Integer> derivToInt = new HashMap<>();
+    Map<String, Integer> varToInt = new HashMap<>();
+    Map<Integer, String[]> gram = new HashMap<>();
 
 
     /**
@@ -27,20 +24,20 @@ public class Parser {
      * parser : list of tokens from parser
      */
     public Parser(String S, int[][] M, int[][] matchTable, String[] parser){
-        //this.V = V;
-        //this.T = T;
-        //this.P = P;
+
         this.S = S;
         this.M = M;
         this.matchTable = matchTable;
         this.parser = parser;
-        System.out.println(Arrays.toString(parser));
         initMap();
-        //runParser();
     }
 
+    /**
+     * run the parser
+     * @return a boolean: true if the code is correct, false if not
+     */
     public boolean runParser(){
-        System.out.println("in Parser ! ");
+
         String x;
         int j = 0;
         int i;
@@ -49,32 +46,24 @@ public class Parser {
         while (! stack.isEmpty()){
             x = stack.peek();
 
-            //System.out.println("lign var: "+ varToInt.get(x) );
-            //System.out.println("lign deriv: "+ derivToInt.get(x) );
-
-            //System.out.println("col: "+ derivToInt.get(parser[j]) );
-
-
-
             if (varToInt.containsKey(x) && this.M[varToInt.get(x)][derivToInt.get(parser[j])] != 0){
                 i= this.M[varToInt.get(x)][derivToInt.get(parser[j])];
                 this.stack.pop();
+
                 for (int k=this.gram.get(i).length-1; k>-1 ; --k){
-                    System.out.println("push: "+ this.gram.get(i)[k]);
-                    if (this.gram.get(i)[k] != ""){
+                    if (!this.gram.get(i)[k].equals("")){
                         this.stack.push(this.gram.get(i)[k]);
                     }
-
                 }
-                //this.stack.push(this.gram.get(j));
                 seq.append(" ").append(i);
             }
 
             else if(derivToInt.containsKey(x) && this.matchTable[derivToInt.get(x)][derivToInt.get(parser[j])] == 1){
                 j++;
-                stack.pop();
+                this.stack.pop();
             }
             else if(derivToInt.containsKey(x) && this.matchTable[derivToInt.get(x)][derivToInt.get(parser[j])]  == 2){
+                seq.deleteCharAt(0);
                 System.out.println(seq);
                 return true;
             }
@@ -88,7 +77,8 @@ public class Parser {
     }
 
     /**
-     * init a map that match name of tokens with their place in the action table
+     * init 3 maps that match name of tokens with their column's number in the action table, rules number with
+     * their derivations, and variables with their column's number
      */
     private void initMap(){
         this.derivToInt.put("VARNAME", 0);
@@ -149,7 +139,7 @@ public class Parser {
         this.gram.put(3, new String[]{"InstList"});
         this.gram.put(4, new String[]{"Instruction", "InstListEnd"});
         this.gram.put(5, new String[]{""});
-        this.gram.put(6, new String[]{"InstList"});
+        this.gram.put(6, new String[]{"SEMICOLON","InstList"});
         this.gram.put(7, new String[]{"Assign"});
         this.gram.put(8, new String[]{"If"});
         this.gram.put(9, new String[]{"While"});
@@ -178,16 +168,9 @@ public class Parser {
         this.gram.put(32, new String[]{"EQUAL"});
         this.gram.put(33, new String[]{"GREATER"});
         this.gram.put(34, new String[]{"SMALLER"});
-        this.gram.put(35, new String[]{"WHILE", "Cond", "THEN","Code", "ENDWHILE" });
+        this.gram.put(35, new String[]{"WHILE", "Cond", "DO","Code", "ENDWHILE"});
         this.gram.put(36, new String[]{"FOR","VARNAME", "FROM", "ExprArith", "BY", "ExprArith", "TO", "ExprArith", "DO", "Code", "ENDFOR" });
         this.gram.put(37, new String[]{"PRINT", "LPAREN", "VARNAME", "RPAREN"});
         this.gram.put(38, new String[]{"READ", "LPAREN", "VARNAME", "RPAREN"});
-
-
-
-
-
-
     }
-
 }
