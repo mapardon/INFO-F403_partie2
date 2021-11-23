@@ -1,3 +1,5 @@
+package src;
+
 /**
  * Class implementing the action table of alCOl in arrays
  */
