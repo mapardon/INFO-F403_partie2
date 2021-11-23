@@ -1,4 +1,3 @@
-
 TEST = {"<S>": [["<Exp>", "END"]],
         "<Exp>": [["<Prod>", "<Exp'>"]],
         "<Exp'>": [["PLUS", "<Prod>", "<Exp'>"],
@@ -17,8 +16,9 @@ GRAMMAR = {
     "<Program>": [["BEG", "<Code>", "END"]],
     "<Code>": [["epsilon"],
                ["<InstList>"]],
-    "<InstList>": [["<Instruction>"],
-                   ["<Instruction>", "SEMICOLON", "<InstList>"]],
+    "<InstList>": [["<Instruction>", "<InstListEnd>"]],
+    "<InstListEnd>": [["epsilon"],
+                      ["SEMICOLON", "<InstList>"]],
     "<Instruction>": [["<Assign>"],
                       ["<If>"],
                       ["<While>"],
@@ -120,7 +120,7 @@ def follow(grammar, initial_symbol):
     follow_values = {k: list() for k in grammar.keys()}
     follow_values[initial_symbol] = ["epsilon"]
 
-     # Main loop
+    # Main loop
     firsts = first(grammar)
 
     updated = True
@@ -188,36 +188,50 @@ def build_action_table(grammar, tokens_list, initial_symbol, endchar):
     for variable in grammar.keys():
         for rule in grammar[variable]:
             i += 1
-            fafA = rule + follows[variable]  # elements of First(α·Follow(A))
+            # fafA = rule + follows[variable]  # elements of First(α·Follow(A))
+            fafA = rule  # elements of First(α·Follow(A))  # just consider sentential form, go in follows if needed
             element = fafA[0]
             add = list()
+
             if not is_variable(element) and element != "epsilon":
                 add.append((element, i))
+
             elif element == "epsilon":
                 next = 1
-                add.append("epsilon")
-                while "epsilon" in add:
-                    add.remove("epsilon")
-                    if not is_variable(fafA[next]):
-                        add.append((fafA[next], i))
-                    elif fafA[next] == "epsilon":
-                        add.append("epsilon")
-                    else:  # variable
-                        for e in firsts[fafA[next]]:
+                add.append(("epsilon", i))
+                while ("epsilon", i) in add:
+                    add.remove(("epsilon", i))
+                    if next < len(fafA):
+                        if not is_variable(fafA[next]) and fafA[next] != "epsilon":
+                            add.append((fafA[next], i))
+                        elif fafA[next] == "epsilon":
+                            add.append(("epsilon", i))
+                        else:  # variable
+                            for e in firsts[fafA[next]]:
+                                add.append((e, i))
+                    else:
+                        for e in follows[variable]:
                             add.append((e, i))
                     next += 1
+
             else:  # is a variable
-                for e in firsts[element]:
-                    add.append((e, [k for k in grammar.keys()].index(element)))
+                for e in firsts[element]:  # reminder: element = fafA[0]
+                    add.append((e, i))
+
+                # test if epsilon has been added
                 next = 1
-                while "epsilon" in add:
-                    add.remove("epsilon")
-                    for e in firsts[fafA[next]]:
-                        add.append((e, i))
+                while ("epsilon", i) in add:
+                    add.remove(("epsilon", i))
+                    if next < len(fafA):
+                        for e in firsts[fafA[next]]:
+                            add.append((e, i))
+                    else:  # must continue search in the follows (with every element sigh)
+                        for e in follows[variable]:
+                            add.append((e, i))
                     next += 1
+
             # finally add elements
             for a in add:
-                print(a)
                 atable[variable][a[0]].append(a[1])
 
     return atable
@@ -225,20 +239,31 @@ def build_action_table(grammar, tokens_list, initial_symbol, endchar):
 
 if __name__ == '__main__':
 
-    x = False
-    if x:
-        res = follow(TEST, "<S>")
-        for k in res:
-            print(k, end=': ')
-            for v in res[k]:
-                print(v, end=' ')
-            print()
+    res = first(TEST)
+    for k in res:
+        print(k, end=': ')
+        for v in res[k]:
+            print(v, end=' ')
+        print()
+    print()
 
-    with open("tokens.txt", 'r', encoding='utf-8') as f:
-        tokens_list = f.readlines()
-    tokens_list = [t[:-1] for t in tokens_list]
-    tokens_list = ["END", "PLUS", "MINUS", "TIMES", "DIVIDE", "NUMBER", "VARNAME", "LPAREN", "RPAREN"]
-    table = build_action_table(TEST, tokens_list, "<S>", "END")
+    res = follow(TEST, "<S>")
+    for k in res:
+        print(k, end=': ')
+        for v in res[k]:
+            print(v, end=' ')
+        print()
+    print()
+
+    test = False
+    if test:
+        tokens_list = ["END", "PLUS", "MINUS", "TIMES", "DIVIDE", "NUMBER", "VARNAME", "LPAREN", "RPAREN"]
+        table = build_action_table(TEST, tokens_list, "<S>", "END")
+    else:
+        with open("tokens.txt", 'r', encoding='utf-8') as f:
+            tokens_list = f.readlines()
+        tokens_list = [t[:-1] for t in tokens_list]
+        table = build_action_table(GRAMMAR, tokens_list, "<S>", "END")
 
     print(end="      ")
     for t in tokens_list:
@@ -249,3 +274,14 @@ if __name__ == '__main__':
         for k2 in table[k].keys():
             print(table[k][k2], end="  ")
         print()
+
+    sentinel = False
+    for k in table.keys():
+        for k2 in table[k].keys():
+            if len(table[k][k2]) > 1:
+                sentinel = True
+
+    if sentinel:
+        print("ko")
+    else:
+        print("ok")
