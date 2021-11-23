@@ -1,4 +1,3 @@
-import jdk.internal.cmm.SystemResourcePressureImpl;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -7,10 +6,20 @@ import java.util.Arrays;
 public class Main {
     public static void main(String[] args) throws IOException, InterruptedException {
 
+        String[] V = {"PLUS","MINUS","AAAA"};
+        String[] T = {"a","b","c"};
+        String[] P = {"règles", "r2", "r3", "r4"};
+        String S = "begin";
+        ArrayList<ArrayList<String>> parsing = new ArrayList<>();
+        int[][] actionTable;
+        int[][] matchTable;
+        //
+
+        //parsing = runPython();
+
 
         String sourceFile = "", option="";
-        ArrayList<String> parser = new ArrayList<>();
-        ArrayList<String> variables = new ArrayList<>();
+
         if(args.length == 0){
             System.out.println("Please enter at least a source file");
             System.exit(0);
@@ -24,6 +33,33 @@ public class Main {
             sourceFile = args[1];
         }
 
+        parsing = runParser(sourceFile);
+        String[] listToken = parsing.get(0).toArray(new String[0]);
+        String[] variables = parsing.get(1).toArray(new String[0]);
+
+        //actionTable = runPython();
+
+        //System.out.println(Arrays.toString(actionTable));
+
+        //System.out.println(Arrays.toString(listToken));
+
+        initActionTable a = new initActionTable();
+        actionTable = a.getActionTable()[0];
+        matchTable = a.getActionTable()[1];
+
+        Scanner scanner = new Scanner(V,T,P,S, actionTable,matchTable, listToken);
+
+    }
+
+    /**
+     * Run the parser
+     * parameter: sourcefile : alcol file
+     * return Arraylist containing an arraylist of token and another arraylist of variables
+     */
+    public static ArrayList<ArrayList<String>> runParser(String sourceFile) throws IOException, InterruptedException {
+        ArrayList<String> parser = new ArrayList<>();
+        ArrayList<String> variables = new ArrayList<>();
+        ArrayList<ArrayList<String>> res = new ArrayList<>();
         String command = "java -jar Part1.jar "+sourceFile;
 
         Process proc = Runtime.getRuntime().exec(command);
@@ -31,13 +67,13 @@ public class Main {
         BufferedReader reader =
                 new BufferedReader(new InputStreamReader(proc.getInputStream()));
 
-        String line = "";
+        String line;
 
         // read the file from the parser and create two arrays, one whith the token and another with the variables
 
         //try (FileWriter fw = new FileWriter("parser.txt")){ // pour écrire dans un fichier texte
         while((line = reader.readLine()) != null && ! line.equals("") ) {
-                //fw.write(Arrays.toString(line.split(" ")) + "\n");
+            //fw.write(Arrays.toString(line.split(" ")) + "\n");
             String[] temp = line.split(" ");
             temp = temp[1].split("\t");
 
@@ -51,8 +87,8 @@ public class Main {
             String[] temp = line.split("\t");
             variables.add(temp[0]);
         }
-        System.out.println("res: "+parser);
-        System.out.println("var: "+variables);
+        //System.out.println("res: "+parser);
+        //System.out.println("var: "+variables);
 
         /*
         }
@@ -65,5 +101,52 @@ public class Main {
 
 
         proc.waitFor();
+
+        res.add(parser);
+        res.add(variables);
+
+        return res;
+    }
+
+    /**
+     * Run the python script building the action table
+     * Return an arraylist of string's array containing the action table
+     */
+    public static ArrayList<String[]> runPython() throws IOException, InterruptedException {
+
+        String command = "python3 main.py";
+
+        Process proc = Runtime.getRuntime().exec(command);
+
+        BufferedReader reader =
+                new BufferedReader(new InputStreamReader(proc.getInputStream()));
+
+        String line;
+
+        // read the file from the parser and create two arrays, one whith the token and another with the variables
+
+        FileWriter fw = new FileWriter("parser.txt"); // pour écrire dans un fichier texte
+        ArrayList<String[]> parser = new ArrayList<>();
+        while((line = reader.readLine()) != null && ! line.equals("") ) {
+            //fw.write(Arrays.toString(line.split(" ")) + "\n");
+            //fw.write(line);
+            //System.out.println(line);
+            //String[] temp = line.split(" ");
+            //temp = temp[1].split("\t");
+            //String[] temp = line.split(" ");
+            //temp.filter(x -> !x.isEmpty()).toArray(String[]::new);
+            parser.add(line.split((" ")));
+
+
+        }
+        /*
+        for (String[] strings : parser) {
+            System.out.println(Arrays.toString(strings));
+        }
+
+         */
+
+        proc.waitFor();
+        return parser;
     }
 }
