@@ -1,7 +1,6 @@
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class Main {
     public static void main(String[] args) throws IOException, InterruptedException {
@@ -9,13 +8,13 @@ public class Main {
         String[] V = {"PLUS","MINUS","AAAA"};
         String[] T = {"a","b","c"};
         String[] P = {"règles", "r2", "r3", "r4"};
-        String S = "begin";
-        ArrayList<ArrayList<String>> parsing = new ArrayList<>();
+        String S = "Program";
+        ArrayList<ArrayList<String>> scanning;
         int[][] actionTable;
         int[][] matchTable;
-        //
 
-        //parsing = runPython();
+
+
 
 
         String sourceFile = "", option="";
@@ -33,9 +32,9 @@ public class Main {
             sourceFile = args[1];
         }
 
-        parsing = runParser(sourceFile);
-        String[] listToken = parsing.get(0).toArray(new String[0]);
-        String[] variables = parsing.get(1).toArray(new String[0]);
+        scanning = runScanning(sourceFile);
+        String[] listToken = scanning.get(0).toArray(new String[0]);
+        String[] variables = scanning.get(1).toArray(new String[0]);
 
         //actionTable = runPython();
 
@@ -47,7 +46,8 @@ public class Main {
         actionTable = a.getActionTable()[0];
         matchTable = a.getActionTable()[1];
 
-        Scanner scanner = new Scanner(V,T,P,S, actionTable,matchTable, listToken);
+        Parser parser = new Parser(S, actionTable,matchTable, listToken);
+        parser.runParser();
 
     }
 
@@ -56,8 +56,8 @@ public class Main {
      * parameter: sourcefile : alcol file
      * return Arraylist containing an arraylist of token and another arraylist of variables
      */
-    public static ArrayList<ArrayList<String>> runParser(String sourceFile) throws IOException, InterruptedException {
-        ArrayList<String> parser = new ArrayList<>();
+    public static ArrayList<ArrayList<String>> runScanning(String sourceFile) throws IOException, InterruptedException {
+        ArrayList<String> scaner = new ArrayList<>();
         ArrayList<String> variables = new ArrayList<>();
         ArrayList<ArrayList<String>> res = new ArrayList<>();
         String command = "java -jar Part1.jar "+sourceFile;
@@ -69,16 +69,15 @@ public class Main {
 
         String line;
 
-        // read the file from the parser and create two arrays, one whith the token and another with the variables
+        // read the file from the scaner and create two arrays, one whith the token and another with the variables
 
-        //try (FileWriter fw = new FileWriter("parser.txt")){ // pour écrire dans un fichier texte
+        //try (FileWriter fw = new FileWriter("scaner.txt")){ // pour écrire dans un fichier texte
         while((line = reader.readLine()) != null && ! line.equals("") ) {
             //fw.write(Arrays.toString(line.split(" ")) + "\n");
             String[] temp = line.split(" ");
-            temp = temp[1].split("\t");
-
-            parser.add(temp[0]);
-            //System.out.println(parser.get(parser.size()-1));
+            //temp = temp[1].split("\t");
+            scaner.add(temp[temp.length-1]);
+            //System.out.println(scaner.get(scaner.size()-1));
 
 
         }
@@ -87,7 +86,7 @@ public class Main {
             String[] temp = line.split("\t");
             variables.add(temp[0]);
         }
-        //System.out.println("res: "+parser);
+        //System.out.println("res: "+scaner);
         //System.out.println("var: "+variables);
 
         /*
@@ -97,12 +96,12 @@ public class Main {
         }
 
          */
-        //System.out.println(parser);
+        //System.out.println(scaner);
 
 
         proc.waitFor();
 
-        res.add(parser);
+        res.add(scaner);
         res.add(variables);
 
         return res;
