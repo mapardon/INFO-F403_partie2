@@ -41,10 +41,11 @@ public class Main {
     }
 
     /**
-     * Run the parser
+     * Run the Scanner
      * parameter: sourcefile : alcol file
      * return Arraylist containing an arraylist of token and another arraylist of variables
      */
+    // TODO: remove jar, use the java class directly (for the final jar generation)
     public static ArrayList<ArrayList<String>> runScanning(String sourceFile) throws IOException, InterruptedException {
         ArrayList<String> scaner = new ArrayList<>();
         ArrayList<String> variables = new ArrayList<>();
