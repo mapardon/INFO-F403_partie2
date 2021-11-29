@@ -2,6 +2,8 @@ package src;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
 
 public class Main {
 
@@ -9,11 +11,12 @@ public class Main {
 
         String S = "Program";
         ArrayList<ArrayList<String>> scanning;
-        int[][] actionTable;
-        int[][] matchTable;
+        Map<String, Map<String, Integer>> actionTable;
 
-        String sourceFile = "", option="";
+        String sourceFile = "../test/easy.co";
 
+        // TODO discomment this
+        /*
         if(args.length == 0){
             System.out.println("Please enter at least a source file");
             System.exit(0);
@@ -25,19 +28,21 @@ public class Main {
         else{
             option = args[0];
             sourceFile = args[1];
-        }
+        }*/
 
         scanning = runScanning(sourceFile);
-        String[] listToken = scanning.get(0).toArray(new String[0]);
-        String[] variables = scanning.get(1).toArray(new String[0]);
+        String[] scannerSequence = scanning.get(0).toArray(new String[0]);
+        scannerSequence = new String[]{"BEG", "IF", "VARNAME", "GREATER", "VARNAME", "THEN", "PRINT", "LPAREN", "VARNAME", "RPAREN", "ENDIF", "END"};
+        actionTable = initActionTable.initTable();
 
-        initActionTable a = new initActionTable();
-        actionTable = a.getActionTable()[0];
-        matchTable = a.getActionTable()[1];
+        System.out.println(Arrays.toString(scannerSequence));
 
-        Parser parser = new Parser(S, actionTable,matchTable, listToken);
-        parser.runParser();
-
+        Parser parser = new Parser(S, actionTable, scannerSequence);
+        if (parser.runParser()) {
+            System.out.println("Program accepted by the parser");
+        } else {
+            System.out.println("Program rejected by the parser");
+        }
     }
 
     /**
@@ -80,5 +85,4 @@ public class Main {
 
         return res;
     }
-
 }
